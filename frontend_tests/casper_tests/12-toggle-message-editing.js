@@ -241,7 +241,7 @@ casper.then(function () {
 casper.then(function () {
     casper.waitUntilVisible('input[type="checkbox"][id="id_realm_allow_message_editing"] + span', function () {
         casper.evaluate(function () {
-            $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val('4');
+            $('input[type="text"][id="id_realm_message_content_edit_limit"]').val('4');
         });
         casper.click('input[type="checkbox"][id="id_realm_allow_message_editing"] + span');
         casper.click('form.org-settings-form button.button');
@@ -255,7 +255,7 @@ casper.then(function () {
             return !(document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked);
         }, 'Allow message editing Setting de-activated');
         casper.test.assertEval(function () {
-            return $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val() === '4';
+            return $('input[type="text"][id="id_realm_message_content_edit_limit"]').val() === '4';
         }, 'Message content edit limit now 4');
     });
 });
@@ -275,7 +275,7 @@ casper.then(function () {
             return document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked;
         }, 'Allow message editing Setting activated');
         casper.test.assertEval(function () {
-            return $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val() === '4';
+            return $('input[type="text"][id="id_realm_message_content_edit_limit"]').val() === '4';
         }, 'Message content edit limit still 4');
     });
 });
@@ -284,7 +284,7 @@ casper.then(function () {
     // allow arbitrary message editing
     casper.waitUntilVisible('input[type="checkbox"][id="id_realm_allow_message_editing"] + span', function () {
         casper.evaluate(function () {
-            $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val('0');
+            $('input[type="text"][id="id_realm_message_content_edit_limit"]').val('0');
         });
         casper.click('form.org-settings-form button.button');
     });
@@ -297,7 +297,7 @@ casper.then(function () {
             return document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked;
         }, 'Allow message editing Setting still activated');
         casper.test.assertEval(function () {
-            return $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val() === '0';
+            return $('input[type="text"][id="id_realm_message_content_edit_limit"]').val() === '0';
         }, 'Message content edit limit is 0');
     });
 });
@@ -306,7 +306,7 @@ casper.then(function () {
     // disallow message editing, with illegal edit limit value. should be fixed by admin.js
     casper.waitUntilVisible('input[type="checkbox"][id="id_realm_allow_message_editing"] + span', function () {
         casper.evaluate(function () {
-            $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val('moo');
+            $('input[type="text"][id="id_realm_message_content_edit_limit"]').val('moo');
         });
         casper.click('input[type="checkbox"][id="id_realm_allow_message_editing"] + span');
         casper.click('form.org-settings-form button.button');
@@ -320,7 +320,7 @@ casper.then(function () {
             return !(document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked);
         }, 'Allow message editing Setting de-activated');
         casper.test.assertEval(function () {
-            return $('input[type="text"][id="id_realm_message_content_edit_limit_minutes"]').val() === '10';
+            return $('input[type="text"][id="id_realm_message_content_edit_limit"]').val() === '10';
         }, 'Message content edit limit has been reset to its default');
     });
 });
