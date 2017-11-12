@@ -114,9 +114,14 @@ def send_future_email(template_prefix, to_user_id=None, to_email=None, from_name
         to_field = {'user_id': to_user_id}  # type: Dict[str, Any]
     else:
         to_field = {'address': parseaddr(to_email)[1]}
+    reference_time = timezone_now()
+    if template_prefix == "zerver/emails/followup_day2":
+        user_profile = UserProfile.objects.filter(id = to_user_id)
+        date_joined = user_profile.values('date_joined')[0].get('date_joined')
+        reference_time = date_joined
 
     ScheduledEmail.objects.create(
         type=EMAIL_TYPES[template_name],
-        scheduled_timestamp=timezone_now() + delay,
+        scheduled_timestamp=reference_time + delay,
         data=ujson.dumps(email_fields),
         **to_field)

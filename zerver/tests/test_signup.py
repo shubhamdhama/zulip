@@ -65,6 +65,7 @@ from typing import Any, Dict, List, Optional, Set, Text
 
 import urllib
 import os
+import pytz
 
 class RedirectAndLogIntoSubdomainTestCase(ZulipTestCase):
     def test_cookie_data(self):
@@ -2439,3 +2440,32 @@ class LoginOrAskForRegistrationTestCase(ZulipTestCase):
         self.assertEqual(user_id, user_profile.id)
         self.assertEqual(response.status_code, 302)
         self.assertIn('http://zulip.testserver', response.url)
+class FollowupEmailTest(ZulipTestCase):
+    def followup_day2_email_test(self):
+        # type: () -> None
+        # Note: The below test will fail if we used time between 00:00 to 00:01 in user timezone because
+        # of our logic of delivering email one hour before the user deal with such kind of stuffs
+        for i in range(1, 8):
+            user_profile = self.example_user('hamlet')
+            # For Melbourne UTC DST offset is +11:00
+            user_profile.timezone = 'Australia/Melbourne'
+            # date_joined is 2018-01-'i' 01:00:00+00:00 where i varies from 1 to 7 to cover all the days in a week
+            user_profile.date_joined = datetime.datetime(2018, 1, i, 1, 0, 0, 0, pytz.UTC)
+            user_profile.save(update_fields = ["timezone", "date_joined"])
+
+            enqueue_welcome_emails(user_profile)
+
+            tz = pytz.timezone(user_profile.timezone)
+            followup_day2_email_time = ScheduledEmail.objects.filter(user=user_profile).values('scheduled_timestamp')[0].get('scheduled_timestamp')
+            followup_day2_email_time_in_user_tz = followup_day2_email_time.astimezone(tz)
+            time_at_signup_in_user_tz = user_profile.date_joined
+            day_at_signup_in_user_tz = time_at_signup_in_user_tz.isoweekday()
+            if day_at_signup_in_user_tz == 4:
+                # For Thrusday we want second followup_email should be delivered on Friday
+                self.assertEqual(followup_day2_email_time_in_user_tz.isoweekday(), 5)
+            elif day_at_signup_in_user_tz == 5:
+                # For Friday we want second followup_email should be delivered on Monday
+                self.assertEqual(followup_day2_email_time_in_user_tz.isoweekday(), 1)
+            else:
+                # For all other days we want second followup_email should be delivered two days delivered
+                self.assertEqual(followup_day2_email_time_in_user_tz.isoweekday(), ((day_at_signup_in_user_tz + 2) % 7))
