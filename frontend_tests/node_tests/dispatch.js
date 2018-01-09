@@ -41,6 +41,9 @@ set_global('settings_org', {
     update_realm_description: noop,
 });
 
+set_global('settings_bots', {
+    update_bot_permissions_ui: noop,
+});
 // page_params is highly coupled to dispatching now
 set_global('page_params', {test_suite: false});
 var page_params = global.page_params;
@@ -182,11 +185,11 @@ var event_fixtures = {
         value: false,
     },
 
-    realm__update__create_generic_bot_by_admins_only: {
+    realm__update__add_bot_by_user_permissions: {
         type: 'realm',
         op: 'update',
-        property: 'create_generic_bot_by_admins_only',
-        value: false,
+        property: 'add_bot_by_user_permissions',
+        value: 1,
     },
 
     realm__update_dict__default: {

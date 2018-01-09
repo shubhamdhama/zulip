@@ -1213,6 +1213,7 @@ class EventsRegisterTest(ZulipTestCase):
             message_retention_days=[10, 20],
             name=[u'Zulip', u'New Name'],
             waiting_period_threshold=[10, 20],
+            add_bot_by_user_permissions=[Realm.NO_RESTRICTION],
         )  # type: Dict[str, Any]
 
         vals = test_values.get(name)

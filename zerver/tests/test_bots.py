@@ -527,7 +527,7 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
         self.assert_num_bots_equal(0)
         self.assert_json_error(result, 'Invalid bot type')
 
-    def test_add_bot_with_bot_type_not_allowed(self) -> None:
+    def test_add_bot_permissions_webhooks_only_normal_user(self) -> None:
         bot_info = {
             'full_name': 'The Bot of Hamlet',
             'short_name': 'hambot',
@@ -535,15 +535,15 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
         }
         bot_email = 'hambot-bot@zulip.testserver'
         bot_realm = get_realm('zulip')
-        bot_realm.create_generic_bot_by_admins_only = True
-        bot_realm.save(update_fields=['create_generic_bot_by_admins_only'])
+        bot_realm.add_bot_by_user_permissions = Realm.WEBHOOKS_ONLY
+        bot_realm.save(update_fields=['add_bot_by_user_permissions'])
 
         # A regular user cannot create a generic bot
         self.login(self.example_email('hamlet'))
         self.assert_num_bots_equal(0)
         result = self.client_post("/json/bots", bot_info)
         self.assert_num_bots_equal(0)
-        self.assert_json_error(result, 'Invalid bot type')
+        self.assert_json_error(result, 'Must be a realm administrator')
 
         # But can create an incoming webhook
         self.assert_num_bots_equal(0)
@@ -552,11 +552,50 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
         profile = get_user(bot_email, bot_realm)
         self.assertEqual(profile.bot_type, UserProfile.INCOMING_WEBHOOK_BOT)
 
-    def test_add_bot_with_bot_type_not_allowed_admin(self) -> None:
+    def test_add_bot_permissions_webhooks_only_admin(self) -> None:
         bot_email = 'hambot-bot@zulip.testserver'
         bot_realm = get_realm('zulip')
-        bot_realm.create_generic_bot_by_admins_only = True
-        bot_realm.save(update_fields=['create_generic_bot_by_admins_only'])
+        bot_realm.add_bot_by_user_permissions = Realm.WEBHOOKS_ONLY
+        bot_realm.save(update_fields=['add_bot_by_user_permissions'])
+
+        # An administrator can create any type of bot
+        self.login(self.example_email('iago'))
+        self.assert_num_bots_equal(0)
+        self.create_bot(bot_type=UserProfile.DEFAULT_BOT)
+        self.assert_num_bots_equal(1)
+        profile = get_user(bot_email, bot_realm)
+        self.assertEqual(profile.bot_type, UserProfile.DEFAULT_BOT)
+
+    def test_add_bot_permissions_admins_only_normal_user(self) -> None:
+        bot_info = {
+            'full_name': 'The Bot of Hamlet',
+            'short_name': 'hambot',
+            'bot_type': 1,
+        }
+        bot_realm = get_realm('zulip')
+        bot_realm.add_bot_by_user_permissions = Realm.ADMINS_ONLY
+        bot_realm.save(update_fields=['add_bot_by_user_permissions'])
+
+        # A regular user cannot create a generic bot
+        self.login(self.example_email('hamlet'))
+        self.assert_num_bots_equal(0)
+        result = self.client_post("/json/bots", bot_info)
+        self.assert_num_bots_equal(0)
+        self.assert_json_error(result, 'Must be a realm administrator')
+
+        # Also, a regular user cannot create a incoming bot
+        bot_info['bot_type'] = 2
+        self.login(self.example_email('hamlet'))
+        self.assert_num_bots_equal(0)
+        result = self.client_post("/json/bots", bot_info)
+        self.assert_num_bots_equal(0)
+        self.assert_json_error(result, 'Must be a realm administrator')
+
+    def test_add_bot_permissions_admins_only_admin(self) -> None:
+        bot_email = 'hambot-bot@zulip.testserver'
+        bot_realm = get_realm('zulip')
+        bot_realm.add_bot_by_user_permissions = Realm.ADMINS_ONLY
+        bot_realm.save(update_fields=['add_bot_by_user_permissions'])
 
         # An administrator can create any type of bot
         self.login(self.example_email('iago'))

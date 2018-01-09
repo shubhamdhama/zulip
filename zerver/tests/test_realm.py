@@ -263,6 +263,19 @@ class RealmTest(ZulipTestCase):
         realm = get_realm('zulip')
         self.assertNotEqual(realm.default_language, invalid_lang)
 
+    def test_change_add_bot_by_user_permissions(self) -> None:
+        # We need an admin user.
+        email = 'iago@zulip.com'
+        self.login(email)
+        req = dict(add_bot_by_user_permissions = ujson.dumps(Realm.WEBHOOKS_ONLY))
+        result = self.client_patch('/json/realm', req)
+        self.assert_json_success(result)
+
+        invalid_add_bot_permission = 4
+        req = dict(add_bot_by_user_permissions = ujson.dumps(invalid_add_bot_permission))
+        result = self.client_patch('/json/realm', req)
+        self.assert_json_error(result, 'Invalid permission option')
+
 
 class RealmAPITest(ZulipTestCase):
 
@@ -297,6 +310,7 @@ class RealmAPITest(ZulipTestCase):
             message_retention_days=[10, 20],
             name=[u'Zulip', u'New Name'],
             waiting_period_threshold=[10, 20],
+            add_bot_by_user_permissions=[1, 1],
         )  # type: Dict[str, Any]
         vals = test_values.get(name)
         if Realm.property_types[name] is bool:
