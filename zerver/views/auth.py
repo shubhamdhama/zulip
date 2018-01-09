@@ -737,6 +737,9 @@ def json_fetch_api_key(request: HttpRequest, user_profile: UserProfile,
     subdomain = get_subdomain(request)
     realm = get_realm(subdomain)
     if password_auth_enabled(user_profile.realm):
+        if user_profile.realm.add_bot_by_user_permissions == Realm.ADMINS_ONLY and\
+                not user_profile.is_realm_admin:
+            return json_error(_("Must be a realm adminstrator"))
         if not authenticate(username=user_profile.email, password=password,
                             realm=realm):
             return json_error(_("Your username or password is incorrect."))

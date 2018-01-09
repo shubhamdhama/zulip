@@ -201,6 +201,7 @@ def home_real(request: HttpRequest) -> HttpResponse:
         furthest_read_time    = sent_time_in_epoch_seconds(latest_read),
         has_mobile_devices    = num_push_devices_for_user(user_profile) > 0,
         bot_types             = get_bot_types(user_profile),
+        bot_permissions_types = Realm.BOT_PERMISSIONS_TYPE,
     )
 
     undesired_register_ret_fields = [

@@ -24,6 +24,19 @@ def check_short_name(short_name_raw: Text) -> Text:
         raise JsonableError(_("Bad name or username"))
     return short_name
 
+def check_add_bot_permissions(user_profile: UserProfile, bot_type: int) -> None:
+    """Raises an exception if the user cannot add a bot
+    in their organization."""
+    # Realm administrators can always add bot
+    if user_profile.is_realm_admin or\
+            user_profile.realm.add_bot_by_user_permissions == Realm.NO_RESTRICTION:
+        return
+    if user_profile.realm.add_bot_by_user_permissions == Realm.ADMINS_ONLY:
+        raise JsonableError(_("Must be a realm administrator"))
+    if user_profile.realm.add_bot_by_user_permissions == Realm.WEBHOOKS_ONLY and\
+            bot_type == UserProfile.DEFAULT_BOT:
+        raise JsonableError(_("Must be a realm administrator"))
+
 def check_valid_bot_type(user_profile: UserProfile, bot_type: int) -> None:
     if bot_type not in user_profile.allowed_bot_types:
         raise JsonableError(_('Invalid bot type'))

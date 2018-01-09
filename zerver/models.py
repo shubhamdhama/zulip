@@ -163,6 +163,11 @@ class Realm(models.Model):
     COMMUNITY = 2
     org_type = models.PositiveSmallIntegerField(default=CORPORATE)  # type: int
 
+    NO_RESTRICTION = 1
+    WEBHOOKS_ONLY = 2
+    ADMINS_ONLY = 3
+    add_bot_by_user_permissions = models.PositiveSmallIntegerField(default=NO_RESTRICTION)  # type: int
+
     date_created = models.DateTimeField(default=timezone_now)  # type: datetime.datetime
     notifications_stream = models.ForeignKey('Stream', related_name='+', null=True, blank=True, on_delete=CASCADE)  # type: Optional[Stream]
     signup_notifications_stream = models.ForeignKey('Stream', related_name='+', null=True, blank=True, on_delete=CASCADE)  # type: Optional[Stream]
@@ -180,7 +185,6 @@ class Realm(models.Model):
         add_emoji_by_admins_only=bool,
         allow_edit_history=bool,
         allow_message_deleting=bool,
-        create_generic_bot_by_admins_only=bool,
         create_stream_by_admins_only=bool,
         default_language=Text,
         description=Text,
@@ -195,6 +199,7 @@ class Realm(models.Model):
         name_changes_disabled=bool,
         restricted_to_domain=bool,
         waiting_period_threshold=int,
+        add_bot_by_user_permissions=int,
     )  # type: Dict[str, Union[type, Tuple[type, ...]]]
 
     ICON_FROM_GRAVATAR = u'G'
@@ -209,6 +214,21 @@ class Realm(models.Model):
 
     DEFAULT_NOTIFICATION_STREAM_NAME = u'announce'
     INITIAL_PRIVATE_STREAM_NAME = u'core team'
+
+    BOT_PERMISSIONS_TYPE = {
+        'NO_RESTRICTION': {
+            'code': NO_RESTRICTION,
+            'description': 'Users can create bots of all types',
+        },
+        'WEBHOOKS_ONLY': {
+            'code': WEBHOOKS_ONLY,
+            'description': 'Restrict users from creating generic bots',
+        },
+        'ADMINS_ONLY': {
+            'code': ADMINS_ONLY,
+            'description': 'Only admin can create bots and access API keys',
+        },
+    }
 
     def authentication_methods_dict(self) -> Dict[Text, bool]:
         """Returns the a mapping from authentication flags to their status,
@@ -713,7 +733,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def allowed_bot_types(self):
         # type: () -> List[int]
         allowed_bot_types = []
-        if self.is_realm_admin or not self.realm.create_generic_bot_by_admins_only:
+        if self.is_realm_admin or not self.realm.add_bot_by_user_permissions == Realm.WEBHOOKS_ONLY:
             allowed_bot_types.append(UserProfile.DEFAULT_BOT)
         allowed_bot_types += [
             UserProfile.INCOMING_WEBHOOK_BOT,

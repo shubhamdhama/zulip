@@ -82,6 +82,37 @@ exports.generate_flaskbotrc_content = function (email, api_key) {
            "\n";
 };
 
+exports.update_bot_settings_tip = function () {
+    var permission_type = page_params.bot_permissions_types;
+    var current_permission = page_params.realm_add_bot_by_user_permissions;
+    var tip_text;
+    if (current_permission === permission_type.ADMINS_ONLY.code) {
+        tip_text = "Only organization administrators can add bot to this organization";
+    } else if (current_permission === permission_type.WEBHOOKS_ONLY.code) {
+        tip_text = "Only orgainzation administrators can add generic bot";
+    } else {
+        tip_text = "Anyone in this organization can add bot";
+    }
+    $(".bot-settings-tip").text(i18n.t(tip_text));
+};
+
+exports.update_bot_permissions_ui = function () {
+    exports.update_bot_settings_tip();
+    $("#id_realm_add_bot_by_user_permissions").val(page_params.realm_add_bot_by_user_permissions);
+    if (page_params.realm_add_bot_by_user_permissions ===
+        page_params.bot_permissions_types.ADMINS_ONLY.code &&
+        !page_params.is_admin) {
+        $('#create_bot_form').hide();
+        $('.add-a-new-bot-tab').hide();
+        $('.account-api-key-section').hide();
+        $("#bots_lists_navbar .active-bots-tab").click();
+    } else {
+        $('#create_bot_form').show();
+        $('.add-a-new-bot-tab').show();
+        $('.account-api-key-section').show();
+    }
+};
+
 exports.set_up = function () {
     $('#payload_url_inputbox').hide();
     $('#create_payload_url').val('');

@@ -106,6 +106,9 @@ function _setup_page() {
         timezones: moment.tz.names(),
         upload_quota: attachments_ui.bytes_to_size(page_params.upload_quota),
         total_uploads_size: attachments_ui.bytes_to_size(page_params.total_uploads_size),
+        admin_only_api_access: page_params.is_admin ||
+            page_params.realm_add_bot_by_user_permissions !==
+            page_params.bot_permissions_types.ADMINS_ONLY.code,
     });
 
     $(".settings-box").html(settings_tab);

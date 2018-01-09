@@ -34,7 +34,6 @@ def update_realm(
         inline_url_embed_preview: Optional[bool]=REQ(validator=check_bool, default=None),
         create_stream_by_admins_only: Optional[bool]=REQ(validator=check_bool, default=None),
         add_emoji_by_admins_only: Optional[bool]=REQ(validator=check_bool, default=None),
-        create_generic_bot_by_admins_only: Optional[bool]=REQ(validator=check_bool, default=None),
         allow_message_deleting: Optional[bool]=REQ(validator=check_bool, default=None),
         allow_message_editing: Optional[bool]=REQ(validator=check_bool, default=None),
         mandatory_topics: Optional[bool]=REQ(validator=check_bool, default=None),
@@ -45,7 +44,8 @@ def update_realm(
         authentication_methods: Optional[Dict[Any, Any]]=REQ(validator=check_dict([]), default=None),
         notifications_stream_id: Optional[int]=REQ(validator=check_int, default=None),
         signup_notifications_stream_id: Optional[int]=REQ(validator=check_int, default=None),
-        message_retention_days: Optional[int]=REQ(converter=to_not_negative_int_or_none, default=None)
+        message_retention_days: Optional[int]=REQ(converter=to_not_negative_int_or_none, default=None),
+        add_bot_by_user_permissions: Optional[int]=REQ(converter=to_not_negative_int_or_none, default=None)
 ) -> HttpResponse:
     realm = user_profile.realm
 
@@ -60,6 +60,11 @@ def update_realm(
     if authentication_methods is not None and True not in list(authentication_methods.values()):
         return json_error(_("At least one authentication method must be enabled."))
 
+    # Additional validation of permissions to access API key or add new bot
+    add_bot_permissions_types = [Realm.NO_RESTRICTION, Realm.WEBHOOKS_ONLY, Realm.ADMINS_ONLY]
+    if add_bot_by_user_permissions is not None and add_bot_by_user_permissions not in\
+            add_bot_permissions_types:
+        return json_error(_("Invalid permission option"))
     # The user of `locals()` here is a bit of a code smell, but it's
     # restricted to the elements present in realm.property_types.
     #

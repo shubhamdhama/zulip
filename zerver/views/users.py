@@ -25,7 +25,7 @@ from zerver.lib.response import json_error, json_success
 from zerver.lib.streams import access_stream_by_name
 from zerver.lib.upload import upload_avatar_image
 from zerver.lib.validator import check_bool, check_string, check_int, check_url, check_dict
-from zerver.lib.users import check_valid_bot_type, \
+from zerver.lib.users import check_valid_bot_type, check_add_bot_permissions, \
     check_full_name, check_short_name, check_valid_interface_type
 from zerver.lib.utils import generate_random_token
 from zerver.models import UserProfile, Stream, Message, email_allowed_for_realm, \
@@ -276,6 +276,7 @@ def add_bot_backend(
         return json_error(_("Username already in use"))
     except UserProfile.DoesNotExist:
         pass
+    check_add_bot_permissions(user_profile, bot_type)
     check_valid_bot_type(user_profile, bot_type)
     check_valid_interface_type(interface_type)
 

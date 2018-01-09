@@ -41,8 +41,6 @@ function _setup_page() {
         realm_email_changes_disabled: page_params.realm_email_changes_disabled,
         realm_add_emoji_by_admins_only: page_params.realm_add_emoji_by_admins_only,
         can_admin_emojis: page_params.is_admin || !page_params.realm_add_emoji_by_admins_only,
-        realm_create_generic_bot_by_admins_only:
-            page_params.realm_create_generic_bot_by_admins_only,
         realm_allow_message_deleting: page_params.realm_allow_message_deleting,
         realm_allow_message_editing: page_params.realm_allow_message_editing,
         realm_message_content_edit_limit_minutes:
@@ -58,12 +56,16 @@ function _setup_page() {
         realm_icon_source: page_params.realm_icon_source,
         realm_icon_url: page_params.realm_icon_url,
         realm_mandatory_topics: page_params.realm_mandatory_topics,
+        bot_permissions_types: page_params.bot_permissions_types,
+        admin_only_api_access: page_params.is_admin ||
+            page_params.realm_add_bot_by_user_permissions !==
+            page_params.bot_permissions_types.ADMINS_ONLY.code,
     };
 
     var admin_tab = templates.render('admin_tab', options);
     $("#settings_content .organization-box").html(admin_tab);
     $("#settings_content .alert").removeClass("show");
-
+    settings_bots.update_bot_settings_tip();
     // Since we just swapped in a whole new page, we need to
     // tell admin_sections nothing is loaded.
     admin_sections.reset_sections();
@@ -83,7 +85,7 @@ function _setup_page() {
     }
 
     $("#id_realm_default_language").val(page_params.realm_default_language);
-
+    $("#id_realm_add_bot_by_user_permissions").val(page_params.realm_add_bot_by_user_permissions);
     // Do this after calling the setup_up methods, so that we can
     // disable any dynamically rendered elements.
     exports.show_or_hide_menu_item();

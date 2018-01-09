@@ -1298,6 +1298,10 @@ input[type=text]#settings_search {
     width: 75px;
 }
 
+#organization-permissions #id_realm_add_bot_by_user_permissions {
+    width: 35vh;
+}
+
 #muted_topics_table {
     margin-bottom: 0px;
     width: 90%;
