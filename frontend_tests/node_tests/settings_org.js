@@ -469,7 +469,7 @@ function test_change_allow_subdomains(change_allow_subdomains) {
     var submit_permissions_form;
     var submit_profile_form;
     $('.organization').on = function (action, selector, f) {
-        if (selector === 'button.save-message-org-settings') {
+        if (selector === '.subsection-header .subsection-changes-save button') {
             assert.equal(action, 'click');
             submit_settings_form = f;
         }

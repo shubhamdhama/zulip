@@ -18,7 +18,7 @@ function submit() {
 function submit_checked() {
     casper.then(function () {
         casper.waitUntilVisible('input:checked[type="checkbox"][id="id_realm_allow_message_editing"] + span', function () {
-            submit();
+            casper.click('#org-submit-msg-editing');
         });
     });
 }
@@ -26,7 +26,7 @@ function submit_checked() {
 function submit_unchecked() {
     casper.then(function () {
         casper.waitUntilVisible('input:not(:checked)[type="checkbox"][id="id_realm_allow_message_editing"] + span', function () {
-            submit();
+            casper.click('#org-submit-msg-editing');
         });
     });
 }
@@ -114,8 +114,9 @@ common.then_click('input[type="checkbox"][id="id_realm_allow_message_editing"] +
 submit_unchecked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can no longer edit their past messages!');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return !(document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked);
         }, 'Allow message editing Setting de-activated');
@@ -167,8 +168,9 @@ common.then_click('input[type="checkbox"][id="id_realm_allow_message_editing"] +
 submit_checked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can now edit topics for all their messages, and the content of messages which are less than 10 minutes old.');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked;
         }, 'Allow message editing Setting re-activated');
@@ -204,8 +206,9 @@ common.then_click('input[type="checkbox"][id="id_realm_allow_message_editing"] +
 submit_unchecked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can no longer edit their past messages!');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return !(document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked);
         }, 'Allow message editing Setting de-activated');
@@ -222,8 +225,9 @@ common.then_click('input[type="checkbox"][id="id_realm_allow_message_editing"] +
 submit_checked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can now edit topics for all their messages, and the content of messages which are less than 4 minutes old.');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked;
         }, 'Allow message editing Setting activated');
@@ -247,8 +251,9 @@ casper.then(function () {
 submit_checked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can now edit the content and topics of all their past messages!');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked;
         }, 'Allow message editing Setting still activated');
@@ -273,8 +278,9 @@ common.then_click('input[type="checkbox"][id="id_realm_allow_message_editing"] +
 submit_unchecked();
 
 casper.then(function () {
-    casper.waitUntilVisible('#admin-realm-message-editing-status', function () {
-        casper.test.assertSelectorHasText('#admin-realm-message-editing-status', 'Users can no longer edit their past messages!');
+    casper.waitUntilVisible('#org-submit-msg-editing[data-status="saved"]', function () {
+        casper.test.assertSelectorHasText('#org-submit-msg-editing',
+                                          'Saved');
         casper.test.assertEval(function () {
             return !(document.querySelector('input[type="checkbox"][id="id_realm_allow_message_editing"]').checked);
         }, 'Allow message editing Setting de-activated');
