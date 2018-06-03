@@ -64,7 +64,8 @@ from zerver.lib.actions import (
     do_change_default_stream_group_name,
     lookup_default_stream_groups,
     can_access_stream_user_ids,
-    validate_user_access_to_subscribers_helper
+    validate_user_access_to_subscribers_helper,
+    public_stream_user_ids,
 )
 
 from zerver.views.streams import (
@@ -91,13 +92,13 @@ class TestCreateStreams(ZulipTestCase):
         # Test stream creation events.
         events = []  # type: List[Mapping[str, Any]]
         with tornado_redirected_to_list(events):
-            ensure_stream(realm, "Public stream", invite_only=False)
+            stream = ensure_stream(realm, "Public stream", invite_only=False)
         self.assert_length(events, 1)
 
         self.assertEqual(events[0]['event']['type'], 'stream')
         self.assertEqual(events[0]['event']['op'], 'create')
         # Send public stream creation event to all active users.
-        self.assertEqual(events[0]['users'], active_user_ids(realm.id))
+        self.assertEqual(events[0]['users'], list(public_stream_user_ids(stream)))
         self.assertEqual(events[0]['event']['streams'][0]['name'], "Public stream")
 
         events = []
@@ -1974,7 +1975,7 @@ class SubscriptionAPITest(ZulipTestCase):
                     streams_to_sub,
                     dict(principals=ujson.dumps([user1.email, user2.email])),
                 )
-        self.assert_length(queries, 43)
+        self.assert_length(queries, 44)
 
         self.assert_length(events, 7)
         for ev in [x for x in events if x['event']['type'] not in ('message', 'stream')]:
@@ -2014,7 +2015,7 @@ class SubscriptionAPITest(ZulipTestCase):
             set([user1.id, user2.id, self.test_user.id])
         )
 
-        self.assertEqual(len(add_peer_event['users']), 19)
+        self.assertEqual(len(add_peer_event['users']), 18)
         self.assertEqual(add_peer_event['event']['type'], 'subscription')
         self.assertEqual(add_peer_event['event']['op'], 'peer_add')
         self.assertEqual(add_peer_event['event']['user_id'], self.user_profile.id)
@@ -2045,7 +2046,7 @@ class SubscriptionAPITest(ZulipTestCase):
 
         # We don't send a peer_add event to othello
         self.assertNotIn(user_profile.id, add_peer_event['users'])
-        self.assertEqual(len(add_peer_event['users']), 19)
+        self.assertEqual(len(add_peer_event['users']), 18)
         self.assertEqual(add_peer_event['event']['type'], 'subscription')
         self.assertEqual(add_peer_event['event']['op'], 'peer_add')
         self.assertEqual(add_peer_event['event']['user_id'], user_profile.id)
