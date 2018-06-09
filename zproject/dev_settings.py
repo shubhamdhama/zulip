@@ -31,6 +31,10 @@ else:
         'zulip': EXTERNAL_HOST,
     }
 
+REALM_HOSTS = {
+    'zulip': 'e386527d.ngrok.io'
+}
+
 ALLOWED_HOSTS = ['*']
 
 # Uncomment extra backends if you want to test with them.  Note that

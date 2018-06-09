@@ -478,7 +478,8 @@ DEVELOPMENT_LOG_DIRECTORY = os.path.join(DEPLOY_ROOT, 'var', 'log')
 USE_X_FORWARDED_HOST = True
 
 # Extend ALLOWED_HOSTS with localhost (needed to RPC to Tornado),
-ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS += ['127.0.0.1', 'localhost', '.ngrok.io'] # This change
+# isn't necessary because below we have all REALM_HOST values
 # ... with hosts corresponding to EXTERNAL_HOST,
 ALLOWED_HOSTS += [EXTERNAL_HOST.split(":")[0],
                   '.' + EXTERNAL_HOST.split(":")[0]]
