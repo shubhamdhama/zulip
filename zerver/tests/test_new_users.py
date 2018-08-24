@@ -9,6 +9,7 @@ from zerver.models import Recipient, Stream, Realm
 from zerver.lib.initial_password import initial_password
 from unittest import mock
 from zerver.lib.timezone import get_timezone
+from django.test import TestCase, override_settings
 
 class SendLoginEmailTest(ZulipTestCase):
     """
@@ -83,6 +84,14 @@ class SendLoginEmailTest(ZulipTestCase):
             for email in mail.outbox:
                 subject = 'New login from an unknown browser on an unknown operating system'
                 self.assertNotEqual(email.subject, subject)
+
+    @override_settings(SEND_LOGIN_EMAILS=True)
+    def test_enable_login_emails_user_setting_is_true(self) -> None:
+        self.assertTrue(settings.SEND_LOGIN_EMAILS)
+        user = self.example_user('hamlet')
+        password = initial_password(user.email)
+        self.client_post("/accounts/login/", info={"username": user.email, "password": password})
+        self.assertEqual(len(mail.outbox), 1)
 
 class TestBrowserAndOsUserAgentStrings(ZulipTestCase):
 
