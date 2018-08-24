@@ -2,9 +2,11 @@ import datetime
 from django.conf import settings
 from django.core import mail
 from django.contrib.auth.signals import user_logged_in
+from django.test import override_settings
+
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.signals import get_device_browser, get_device_os, JUST_CREATED_THRESHOLD
-from zerver.lib.actions import notify_new_user
+from zerver.lib.actions import notify_new_user, do_change_notification_settings
 from zerver.models import Recipient, Stream, Realm
 from zerver.lib.initial_password import initial_password
 from unittest import mock
@@ -83,6 +85,26 @@ class SendLoginEmailTest(ZulipTestCase):
             for email in mail.outbox:
                 subject = 'New login from an unknown browser on an unknown operating system'
                 self.assertNotEqual(email.subject, subject)
+
+    @override_settings(SEND_LOGIN_EMAILS=True)
+    def test_enable_login_emails_user_setting(self) -> None:
+        user = self.example_user('hamlet')
+        do_change_notification_settings(user, "enable_login_emails", False)
+
+        self.assertFalse(user.enable_login_emails)
+        self.login(user.email)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(SEND_LOGIN_EMAILS=True)
+    def test_enable_login_emails_user_setting_is_true(self) -> None:
+        self.assertTrue(settings.SEND_LOGIN_EMAILS)
+        user = self.example_user('hamlet')
+        password = initial_password(user.email)
+        self.client_post("/accounts/login/", info={"username": user.email, "password": password})
+        self.assertTrue(user.enable_login_emails)
+        import logging
+        logging.info(mail.outbox[0])
+        self.assertEqual(len(mail.outbox), 1)
 
 class TestBrowserAndOsUserAgentStrings(ZulipTestCase):
 
