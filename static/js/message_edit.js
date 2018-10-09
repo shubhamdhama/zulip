@@ -16,21 +16,12 @@ var editability_types = {
 };
 exports.editability_types = editability_types;
 
-function is_topic_editable(message, edit_limit_seconds_buffer) {
-    var now = new XDate();
-    edit_limit_seconds_buffer = edit_limit_seconds_buffer || 0;
-
-    // TODO: Change hardcoded value (24 hrs) to be realm setting
-    return message.sent_by_me || page_params.realm_allow_community_topic_editing
-        && 86400 + edit_limit_seconds_buffer + now.diffSeconds(message.timestamp * 1000) > 0;
-}
-
 function get_editability(message, edit_limit_seconds_buffer) {
     edit_limit_seconds_buffer = edit_limit_seconds_buffer || 0;
     if (!message) {
         return editability_types.NO;
     }
-    if (!is_topic_editable(message, edit_limit_seconds_buffer)) {
+    if (!(message.sent_by_me || page_params.realm_allow_community_topic_editing)) {
         return editability_types.NO;
     }
     if (message.failed_request) {
@@ -69,7 +60,6 @@ function get_editability(message, edit_limit_seconds_buffer) {
     return editability_types.NO_LONGER;
 }
 exports.get_editability = get_editability;
-exports.is_topic_editable = is_topic_editable;
 
 exports.get_deletability = function (message) {
     if (page_params.is_admin) {
